@@ -29,7 +29,8 @@
 ## Pseudocode for the overall gameplay:
 > This pseudocode does not need to go into exhaustive detail but should demonstrate that you understand some of the unique challenges you will encounter while building your game.
 
-- Declare var arrays for 1 deck, 6 players, turns, scores, game-log
+- Declare var arrays for 1 deck, 6 players, turns, scores, game-log.
+- Declare var for result.
 - Create HTML divs for the deck, each player, and the display.
 - - All cards except the player's should display the back of the card.
 - - The player's cards should display the front of the card(s).
@@ -55,15 +56,23 @@ if (players === 3) {
     - hides the divs containing the non-playing hands
     - organizes the page to show the players' hands
     - shows the `display`
-    - states the `gameStatus`
-    - states in the `gameLog`: *(x) players have started a game of Go Fish!*
+    - states the `gameStatus`: *(x) players have started a game of Go Fish!*
+    - pushes `gameStatus` to `gameLog`
 - The `display`:
-    - shows a `scoreboard`
+    - shows `scoreboard`
         - shows `scores` for each player
-    - shows a `gameLog`
-    - states the current turn with the `turns` array
-    - state
-
+    - shows `gameLog`
+    - shows `gameStatus` with the `turns` array: *Player (x) asks player (y) if they have (card).*
+        - pushes `gameStatus` to `gameLog`.
+    - shows `result` in `gameStatus`.
+        - pushes `result` to `gameLog`.
+- The `takingTurns()`
+    - selects the next player to make a move
+- The `checkStatus()`
+    - checks if all arrays are empty
+    - checks for the highest score amongst the players
+    - send message to `gameStatus` if clear winner: *Player (x) has won the game!*
+    - send message to `gameStatus` if tie: *It's a tie between Players (x),(y),(z)!*
 
 
 // game announces winner to have an empty hand 
