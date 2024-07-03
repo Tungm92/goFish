@@ -9,6 +9,7 @@ body {
 
 .container {
   display: flex;
+  flex-wrap: wrap;
   flex-direction: row;
   justify-content: center;
   align-items: center;
@@ -34,4 +35,23 @@ body {
   background-color: #202d7a;
   font-weight: bold;
   border: 2px solid #202d7a;
+}
+
+.hand {
+display:flex;
+align-items: center;
+}
+
+ul {
+display: flex;
+flex-wrap: wrap;
+}
+
+li {
+display: flex;
+flex-direction: column;
+}
+
+#display {
+display:flex;
 }

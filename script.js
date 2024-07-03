@@ -42,28 +42,56 @@
 const gameLog = [''];
 const message = '';
 
-const names = ['you', 'the computer', 'the second computer', 'the third computer']
-const scores = [0, 0];
+
+const names = ['you', 'the computer']
+const scores = [9, 0];
 const playerScore = scores[0];
 const comScore = scores[1];
 const playerCards = [];
 const comCards = [];
 
-const init = () => {
-    deck1 = ["dA","dQ","dK","dJ","d10","d09","d08","d07","d06","d05","d04","d03","d02","hA","hQ","hK","hJ","h10","h09","h08","h07","h06","h05","h04","h03","h02","cA","cQ","cK","cJ","c10","c09","c08","c07","c06","c05","c04","c03","c02","sA","sQ","sK","sJ","s10","s09","s08","s07","s06","s05","s04","s03","s02"]
-};
+let deck
+let currentPlayer
+
+
 
 
 
 // cached element references
 
-// let player = document.querySelector('#player');
-// let com = document.querySelector('#computer');
-// let deck = document.querySelector('#deck');
+let playerEl = document.querySelector('#player');
+let comEl = document.querySelector('#computer');
+let deckEl = document.querySelector('#deck');
 
 
 // functions 
 
+const deal = () => {
+    while (playerCards.length < 7) {
+        comCards.push(deck.pop())
+        playerCards.push(deck.pop())
+    }
+}
+
+const init = () => {
+    let deck = ["dA","dQ","dK","dJ","d10","d09","d08","d07","d06","d05","d04","d03","d02","hA","hQ","hK","hJ","h10","h09","h08","h07","h06","h05","h04","h03","h02","cA","cQ","cK","cJ","c10","c09","c08","c07","c06","c05","c04","c03","c02","sA","sQ","sK","sJ","s10","s09","s08","s07","s06","s05","s04","s03","s02"]
+    const shuffle = (deck) => {
+        for (var i = deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random()*(i+1));
+            const temp = deck[i];
+            deck[i] = deck[j];
+            deck[j] = temp
+        }
+    }
+    shuffle(deck)
+    deal()
+    currentPlayer = 'Player 1'
+};
+const gameLoop = () => {
+    while (deck.length > 0 && playerCards.length > 0) {
+        // this is tomorrow's problem.
+    }
+}
 
 const finalScore = () => {
     let highScore = Math.max.apply(Math, scores);
@@ -75,7 +103,6 @@ const finalScore = () => {
     console.log(`And the winner is... ${winner}`)
     }
 }
-finalScore()
 const checkCards = () => {
     if (deck.length === 0 && playerHand.length === 0) {
         finalScore()
@@ -84,23 +111,21 @@ const checkCards = () => {
     }
 };
 
+
+const handleGoFish = () => {
+    if (deck.length > 0) {
+    let randomIdx = Math.floor(Math.random() * deck.length)
+    let cardPicked = deck.splice(randomIdx, 1)[0]
+    playerCards.push(cardPicked)
+    }}
+
 const render = () => {
     checkCards()
 }
 
 // event listeners
 
-// // Declare variables
-// const deck1 = []
-// const deck2 = []
-// const p1 = []
-// const p2 = []
-// const p3 = []
-// const p4 = []
-// const p5 = []
-// const p6 = []
-// const turns = []
-// const scores = []
+
 // const gameLog = []
 // const gameStatus = ""
 // const gameSize = [3, 4, 5, 6]
@@ -223,12 +248,7 @@ const render = () => {
 // }
 
 // // Function to handle a button click:
-// const handleDeal = () => {
-//     if (deck1.length > 0) {
-//     let randomIdx = Math.floor(Math.random() * deck1.length)
-//     let cardPicked = deck1.splice(randomIdx, 1)[0]
-//     deck2.push(cardPicked)
-//     render(cardPicked)
+
 // }
 //     // Randomly select number from total cards remaining
 //     // Assign card with the random index to a variable
