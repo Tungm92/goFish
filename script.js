@@ -1,26 +1,27 @@
 // Initialize Game
 // START GAME
-//   SETUP deck of 52 cards
-//   SHUFFLE deck
-//   DEAL 5 cards to each player (7 for 2 players)
-//   SET current player to Player 1
+//   SETUP deck of 52 cards | done
+//   SHUFFLE deck | done
+//   DEAL 5 cards to each player (7 for 2 players) | done
+//   SET current player to Player 1 | done 
 
 // Main Game Loop
 // WHILE no player has won
-//   DISPLAY current player's hand
-//   DISPLAY current backs of cards for all other players
+//   DISPLAY current player's hand | done
+//   DISPLAY current backs of cards for all other players | done
 
 // Player's Turn
-//   ASK current player to choose another player to request a card from
-//   ASK current player to choose a card to request
+//   MAKE the comCards playerCards match own cards at the start of the game
+//   ASK current player to choose another player to request a card from | done
+//   ASK current player to choose a card to request | done
 
 // Check if other player has the requested card
-//   IF chosen player has the card requested
-//     TRANSFER card requested from chosen player to current player
-//     DISPLAY successful transfer message
+//   IF chosen player has the card requested | done
+//     TRANSFER card requested from chosen player to current player | done
+//     DISPLAY successful transfer message | done
 //   ELSE
-//     DISPLAY "Go Fish" message
-//     DRAW a card from the deck for the current player
+//     DISPLAY "Go Fish" message | done
+//     DRAW a card from the deck for the current player | done
 //     IF drawn card matches the card
 //       DISPLAY "You drew the card you asked for!" message
 
@@ -39,19 +40,21 @@
 
 // declare variables
 
-const gameLog = [''];
-const message = '';
+const gameLog = [];
 
 
 const names = ['you', 'the computer']
-const scores = [9, 0];
-const playerScore = scores[0];
-const comScore = scores[1];
+const scores = [0, 0];
 const playerCards = [];
 const comCards = [];
+const matches =[];
+const playerPairs = []
+const comPairs = []
 
-let deck
+let deck = ["dA0","dQ0","dK0","dJ0","d10","d09","d08","d07","d06","d05","d04","d03","d02","hA0","hQ0","hK0","hJ0","h10","h09","h08","h07","h06","h05","h04","h03","h02","cA0","cQ0","cK0","cJ0","c10","c09","c08","c07","c06","c05","c04","c03","c02","sA0","sQ0","sK0","sJ0","s10","s09","s08","s07","s06","s05","s04","s03","s02"]
 let currentPlayer
+let rank
+let message
 
 
 
@@ -59,10 +62,9 @@ let currentPlayer
 
 // cached element references
 
-let playerEl = document.querySelector('#player');
-let comEl = document.querySelector('#computer');
+let handEl = document.querySelector('.hand');
+let comEl = document.querySelector('.computer-player');
 let deckEl = document.querySelector('#deck');
-
 
 // functions 
 
@@ -73,25 +75,104 @@ const deal = () => {
     }
 }
 
-const init = () => {
-    let deck = ["dA","dQ","dK","dJ","d10","d09","d08","d07","d06","d05","d04","d03","d02","hA","hQ","hK","hJ","h10","h09","h08","h07","h06","h05","h04","h03","h02","cA","cQ","cK","cJ","c10","c09","c08","c07","c06","c05","c04","c03","c02","sA","sQ","sK","sJ","s10","s09","s08","s07","s06","s05","s04","s03","s02"]
-    const shuffle = (deck) => {
-        for (var i = deck.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random()*(i+1));
-            const temp = deck[i];
-            deck[i] = deck[j];
-            deck[j] = temp
-        }
+const checkCards = () => {
+
+    // this checks for matches in the computer's hand
+    if (deck.length === 0 && playerHand.length === 0) {
+        message = `Great game! Let's check the final score.`
+        gameLog.push(message)
+        currentPlayer = 'game over'
+        finalScore()
+    } else {
+        return
     }
-    shuffle(deck)
-    deal()
-    currentPlayer = 'Player 1'
 };
-const gameLoop = () => {
-    while (deck.length > 0 && playerCards.length > 0) {
-        // this is tomorrow's problem.
+
+const shuffle = (deck) => {
+    for (var i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random()*(i+1));
+        const temp = deck[i];
+        deck[i] = deck[j];
+        deck[j] = temp
     }
 }
+
+const showHands = () => {
+    playerCards.forEach(card => {
+        const newCardEl = document.createElement('li')
+        newCardEl.classList.add("card", card)
+        handEl.appendChild(newCardEl)
+    });
+    comCards.forEach(card => {
+        const newCardEl = document.createElement('li')
+        newCardEl.classList.add("card","back-blue", card)
+        comEl.appendChild(newCardEl)
+    });
+}
+
+const turns = () => {
+    if (currentPlayer === 'Player 1') {
+        message = `It's your turn. Click on the card you want to make a pair with.`
+        gameLog.push(message)
+    }
+}
+
+const init = () => {
+    shuffle(deck)
+    deal()
+    // checkCards()
+    showHands()
+    currentPlayer = 'Player 1'
+    turns()
+};
+
+//testing area
+init()
+console.log(`these are the com's cards ${comCards}, and these are your cards ${playerCards}`)
+    for (i=0;i<playerCards.length;i++) {
+        let tempArray = [...playerCards]
+        let rank = playerCards[i][1]+playerCards[i][2]
+        tempArray.splice(i,1,'')
+        for (idx of tempArray) {
+            if (idx !== '') {
+                let match = idx[1]+idx[2]
+                if (rank === match) {
+                        console.log(playerCards)
+                        playerPairs.push(playerCards[i])
+                        playerCards.splice(i,1)
+                        playerPairs.push(playerCards[playerCards.findIndex(element => element.includes(`${match}`))])
+                        playerCards.splice(playerCards.findIndex(element => element.includes(`${match}`)),1)
+                        // use the partial match with the .includes function
+                        console.log(playerCards)
+
+                    // pairs.push(idx)
+                    // pairs.push(playerCards[i])
+                    // if (pairs.length === 2) {
+                        // const playerCardEl1 = document.getElementsByClassName(idx)
+                        // const playerCardEl2 = document.getElementsByClassName(playerCards[i])
+                        // scores[0]=scores[0]+1
+                        // playerCardEl1[0].parentNode.removeChild(playerCardEl1[0])
+                        // playerCardEl2[0].parentNode.removeChild(playerCardEl2[0])
+                        // pairs.length=0
+                    // }
+                    // remove elements from hand
+                    // this removes an odd number of cards, how do I make it only pairs?
+                    // push the cards into a pairs array and remove the elements through that
+                }
+            }
+        }
+
+            //         // remove elements from hand
+
+            //         // remove values from playerCards
+            //         // console.log(playerCards)
+            //     }
+            //     }
+            // })
+            // console.log(`this is the ${card} loop`)
+        }
+// close of testing area
+
 
 const finalScore = () => {
     let highScore = Math.max.apply(Math, scores);
@@ -103,21 +184,6 @@ const finalScore = () => {
     console.log(`And the winner is... ${winner}`)
     }
 }
-const checkCards = () => {
-    if (deck.length === 0 && playerHand.length === 0) {
-        finalScore()
-    } else {
-        return
-    }
-};
-
-
-const handleGoFish = () => {
-    if (deck.length > 0) {
-    let randomIdx = Math.floor(Math.random() * deck.length)
-    let cardPicked = deck.splice(randomIdx, 1)[0]
-    playerCards.push(cardPicked)
-    }}
 
 const render = () => {
     checkCards()
@@ -125,195 +191,35 @@ const render = () => {
 
 // event listeners
 
-
-// const gameLog = []
-// const gameStatus = ""
-// const gameSize = [3, 4, 5, 6]
-// const table = [
-//     '', '', '', '', '',
-// ]
-
-// let currentTurn
-// let cardToRemove
-
-
-// // Cached element references
-// let deck1El = document.querySelector('#deck-1')
-// let deck2El = document.querySelector('#deck-2')
-// let deal = document.querySelector('#btn')
-
-// // Functions
-
-// /*
-// const takingTurns = () => {
-//     if (turns[turns.length-1] === 'p1') {
-//         playerTurn()
-//     } else if (turns[turns.length-1] === 'p2') {
-//         p2Turn()
-//     } else if (turns[turns.length-1] === 'p3') {
-//         p3Turn()
-//     } else if (turns[turns.length-1] === 'p4') {
-//         p4Turn()
-//     } else if (turns[turns.length-1] === 'p5') {
-//         p5Turn()
-//     } else if (turns[turns.length-1] === 'p6') {
-//         p6Turn()
-//     }
-//     const playerTurn = () => {
-//         p1SelectPlayer()
-//         p1SelectCard()
-//         ask()
-//         addPoint()
-//         turns.push('p2')
-//     }
-//     const p2Turn = () => {
-//         comSelectPlayer()
-//         comSelectCard()
-//         ask()
-//         addPoint()
-//         turns.push('p3')
-//     }
-//     const p3Turn = () => {
-//         comSelectPlayer()
-//         comSelectCard()
-//         ask()
-//         addPoint()
-//         if (players > 3) {
-//         turns.push('p4')
-//         } else {
-//         turns.push('p1')
-//         }
-//     }
-//     const p4Turn = () => {
-//         comSelectPlayer()
-//         comSelectCard()
-//         ask()
-//         addPoint()
-//         if (players > 4) {
-//         turns.push('p5')
-//         } else {
-//         turns.push('p1')
-//         }
-//     }
-//     const p5Turn = () => {
-//         comSelectPlayer()
-//         comSelectCard()
-//         ask()
-//         addPoint()
-//         if (players > 5) {
-//         turns.push('p6')
-//         } else {
-//         turns.push('p1')
-//         }
-//     }
-//     const p6Turn = () => {
-//         comSelectPlayer()
-//         comSelectCard()
-//         ask()
-//         addPoint()
-//         turns.push('p1')
-//     }
-// }
-// */
-
-// // Initialize deck 1 with array of 52 cards
-// const init = () => {
-//     deck1 = ["dA","dQ","dK","dJ","d10","d09","d08","d07","d06","d05","d04","d03","d02","hA","hQ","hK","hJ","h10","h09","h08","h07","h06","h05","h04","h03","h02","cA","cQ","cK","cJ","c10","c09","c08","c07","c06","c05","c04","c03","c02","sA","sQ","sK","sJ","s10","s09","s08","s07","s06","s05","s04","s03","s02"]
-//   }
-//   // invoke the function
-//   init()
-
-// const render = (cardPicked) => {
-//     // Remove outline class when first card is picked
-//     if (deck2.length === 1) {
-//         deck2El.classList.remove("outline")
-//     }
-//     // Removes previously picked card from deck 2 class list
-//     if (deck2.length >1) {
-//         deck2El.classList.remove(cardToRemove)
-//     }
-//     // Add current card picked to deck 2 element
-//     deck2El.classList.add(cardPicked)
-//     cardToRemove = cardPicked
-//     // Adjust shadow when deck gets above/below halfway full
-//     if (deck2.length === 26) {
-//         deck2El.classList.add("shadow");
-//         deck1El.classList.remove("shadow");
-//     }
-//     // Remove card back color and add outline when last card is picked
-//     if (deck1.length === 0) {
-//         deck1El.classList.add("outline");
-//         deck1El.classList.remove("back-blue");
-//     }
-// }
-
-// // Function to handle a button click:
-
-// }
-//     // Randomly select number from total cards remaining
-//     // Assign card with the random index to a variable
-//     // Add card picked to deck 2
-//     // Pass card picked to render function to display
-//   };
-
-// // Event listeners
-
-// deal.addEventListener('click', handleDeal)
-
-
-
-
-
-
-
-
-// // player selection
-
-// /*
-
-// const p1SelectPlayer = () => {
-//     let player = }
-
-// */
-
-// // how to add points
-
-// /*
-
-// const addPoint = () => {
-//     if }
-
-// */
-
-// // number of players
-// // it knows the number of players based on my selection
-// // i select from an array how many players
-
-// /*
-
-// const numPlayers = () = >{
-//     }
-
-// */
-
-// // result
-// /* 
-
-// const result = () => {
-//     if the selected player's hand has the card, remove it and add one point
-//     if not then say there was no match
-//     selectedPlayer.forEach(card) => {
-//         if (card === selectedCard) {
-//         selectedPlayer.splice(card, 1)
-
-//         } else {gameStatus.push(`Player ${turn} asks )}}
-// */
-
-// // to deal the cards
-
-// /*
-
-// const handleDeal = () => {
-//     if }
-
-// */
+handEl.addEventListener('click', (event) => {
+    rank = String(event.target.classList[1][1])+String(event.target.classList[1][2])
+    if (currentPlayer === 'Player 1' && rank !== '') {
+        for (let i = 0; i < comCards.length; i++) {
+            let comCardEl = document.getElementsByClassName(comCards[i])
+            let match = String(comCards[i][1]+comCards[i][2])
+            let myCard = event.target.classList[1]
+            if (rank === match) {
+                scores[0] = scores[0]+1 // increase player score by 1
+                matches.push(myCard) // saving this to show the player's card in the middle of the table
+                matches.push(comCards[i]) // saving this to show the computer's card in the middle of the table
+                message = `It's a match! The computer had a ${comCards[i]}. You have ${playerScore} points.`
+                gameLog.push(message)
+                event.target.remove() // this removes the HTML element from .hand
+                playerCards.splice(playerCards.indexOf(myCard),1) // this removes the corresponding array element
+                comCardEl[0].parentNode.removeChild(comCardEl[0]) // this removes the HTML element from computer
+                comCards.splice(i,1) // this removes the corresponding array element
+                currentPlayer = 'Computer'
+                console.log("it's a girl!", scores)
+                return
+            }
+        }
+        const newCardEl = document.createElement('li')
+        message = `Oops, looks like the computer doesn't have a match. Let's go fish!`
+        gameLog.push(message)
+        playerCards.push(deck.pop())
+        newCardEl.classList.add("card", playerCards[playerCards.length-1])
+        handEl.appendChild(newCardEl)
+        currentPlayer = 'Computer'
+        checkCards()
+    }
+});

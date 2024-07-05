@@ -9,23 +9,27 @@
     <script defer src="script.js"></script>
     <title>Card Games</title>
 </head>
-<body>
-    <div class="table">
-        <div id="hand" class="card large outline"></div>
-        <div id="deck" class="card large back-blue shadow"></div>
-        <div id="com1" class="card large back-blue shadow"></div>
-      </div>
-      <button id="btn" class="btn">Deal</button>
-    <div id="display">
-        <div id="status"></div>
-        <div id="game-log"></div>
+<header>
+    <div id="directions"> How to Play:
+        <li>1. Pick a card you would like to ask for.</li>
+        <li>2. Click on the card/hand of the player you would like to ask the card from.</li>
+        <li>3. As the game continues, refer to the game log to track what cards are in a player's hand.</li>
+        <li>4. Every pair of matching cards is 1 point.</li>
+        <li>5. The game ends when all cards have been matched.</li>
     </div>
-    <div class="hand">Here is your hand:
-        <ul>
-            <li class="card sQ">Spade Queen</li>
-            <li class="card sK">Spade King</li>
-
-        </ul>
+</header>
+<body>
+    <div class="computer-player">
+        <li></li>
+    </div>
+    <div>
+        <button id="btn" class="btn">Start a Game</button>
+        <div id="display">
+            <div id="status"></div>
+            <div id="game-log"></div>
+        </div>
+    </div>
+    <div class="hand">
     </div>
 </body>
 </html>

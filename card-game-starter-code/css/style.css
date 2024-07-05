@@ -4,7 +4,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 50vmax;
+  background-image: url("https://vikinglogfurniture.com/wp-content/uploads/2018/12/NDBH1-1.jpg");
 }
 
 .container {
@@ -28,30 +28,45 @@ body {
 }
 
 .btn {
-  margin-top: 2vh;
+  margin: 2vmax;
   padding: .8rem;
   border-radius: 5px;
   color: white;
   background-color: #202d7a;
   font-weight: bold;
   border: 2px solid #202d7a;
+  box-shadow: 7px 7px 7px 0 rgba(41, 41, 41, 0.95)
 }
 
 .hand {
 display:flex;
 align-items: center;
+flex-wrap: wrap;
 }
 
-ul {
-display: flex;
-flex-wrap: wrap;
+.hand li {
+  box-shadow: 7px 7px 7px 0 rgba(41, 41, 41, 0.95)
 }
 
 li {
 display: flex;
 flex-direction: column;
+position: relative;
 }
 
 #display {
 display:flex;
+}
+
+header {
+  display: flex;
+  flex-direction: column;
+  font-size: 24px;
+  margin: 0 0 5vmax 0;
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  border-style: solid;
+  border-color: black;
+  box-shadow: 7px 7px 7px 0 rgba(41, 41, 41, 0.95)
 }
