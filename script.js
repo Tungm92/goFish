@@ -1,43 +1,3 @@
-// Initialize Game
-// START GAME
-//   SETUP deck of 52 cards | done
-//   SHUFFLE deck | done
-//   DEAL 5 cards to each player (7 for 2 players) | done
-//   SET current player to Player 1 | done 
-
-// Main Game Loop
-// WHILE no player has won
-//   DISPLAY current player's hand | done
-//   DISPLAY current backs of cards for all other players | done
-
-// Player's Turn
-//   MAKE the comCards playerCards match own cards at the start of the game | done
-//   ASK current player to choose another player to request a card from | done
-//   ASK current player to choose a card to request | done
-
-// Check if other player has the requested card
-//   IF chosen player has the card requested | done
-//     TRANSFER card requested from chosen player to current player | done
-//     DISPLAY successful transfer message | done
-//   ELSE
-//     DISPLAY "Go Fish" message | done
-//     DRAW a card from the deck for the current player |
-//     IF drawn card matches the card 
-//       DISPLAY "You drew the card you asked for!" message | done
-
-// Check if deck is empty | done
-//   IF deck is empty | done
-//     END game and determine winner based on number of cards | done
-
-// Switch turn to next player | done
-//   SET next player as current player | done
-
-// End Game
-// DISPLAY winner based on who has the most cards
-// DISPLAY final hands of all players
-// END GAME
-
-
 // declare variables
 
 const gameLog = [];
@@ -180,60 +140,70 @@ const removePairs = (arrayOfCards) => {
 const turns = () => {
     if (gameOn === true) {
         
-        // create computer logic for the computer's turn
-        if (playerTurn === false) {
+        // clear that the computer has more than one card
+        if (comCards.length > 0) {
 
-            // the computer selects a card
-            let comCard = comCards[Math.floor(Math.random()*comCards.length)]
-            rank = comCard[1]+comCard[2]
+            // create computer logic for the computer's turn
+            if (playerTurn === false) {
 
-            // message the result
-            message = `The computer asks for a ${comCard}.`
-            updateLog(message)
-
-            // compare the selected card with the player's cards
-            for (let i=0; i < playerCards.length; i++) {
-                let playerCard = playerCards[i]
-                let match = playerCard[1]+playerCard[2]
-                
-                // set the element in case of a match
-                let playerCardEl = document.getElementsByClassName(playerCard)
-                
-                if (rank === match) {
+                // the computer selects a card
+                let comCard = comCards[Math.floor(Math.random()*comCards.length)]
+                rank = comCard[1]+comCard[2]
+    
+                // message the result
+                message = `The computer asks for a ${comCard}.`
+                updateLog(message)
+    
+                // compare the selected card with the player's cards
+                for (let i=0; i < playerCards.length; i++) {
+                    let playerCard = playerCards[i]
+                    let match = playerCard[1]+playerCard[2]
                     
-                    // message the result
-                    message = `Looks like they got your ${playerCard}.`
-                    updateLog(message)
-
-                    // move the card to the comCards array
-                    comCards.push(playerCard);
-                    newCardEl.classList.add("card", "back-blue", comCards[comCards.length-1]);
-                    comEl.appendChild(newCardEl);
-
-                    // remove the card from the array and browser
-                    playerCards.splice(i,1);
-                    playerCardEl[0].parentNode.removeChild(playerCardEl[0]);
+                    // set the element in case of a match
+                    let playerCardEl = document.getElementsByClassName(playerCard)
                     
-                    // remove the pair using the removePairs()
-                    comCards = removePairs(comCards);
-
-                    // check game state
-                    checkCards();
-
-                    // add a condition to continue picking cards
-                    if (comCards.length > 0) {
-                        comCard = comCards[Math.floor(Math.random()*comCards.length)]
-                        rank = comCard[1]+comCard[2]
-                        playerCardEl = document.getElementsByClassName(playerCard)
+                    if (rank === match) {
+                        
+                        // message the result
+                        message = `Looks like they got your ${playerCard}.`
+                        updateLog(message)
+    
+                        // move the card to the comCards array
+                        comCards.push(playerCard);
+                        newCardEl.classList.add("card", "back-blue", comCards[comCards.length-1]);
+                        comEl.appendChild(newCardEl);
+    
+                        // remove the card from the array and browser
+                        playerCards.splice(i,1);
+                        playerCardEl[0].parentNode.removeChild(playerCardEl[0]);
+                        
+                        // remove the pair using the removePairs()
+                        comCards = removePairs(comCards);
+    
+                        // check game state
+                        checkCards();
+    
+                        // add a condition to continue picking cards
+                        if (comCards.length > 0) {
+                            comCard = comCards[Math.floor(Math.random()*comCards.length)]
+                            rank = comCard[1]+comCard[2]
+                            playerCardEl = document.getElementsByClassName(playerCard)
+                        }
                     }
                 }
-            }
-
-            // message computer's results
-            message = `But you don't have one so it had to go fish!`;
-            updateLog();
-            
-            // computer grabs a card and end turn
+    
+                // message computer's results
+                message = `But you don't have one so it had to go fish!`;
+                updateLog();
+                
+                // computer grabs a card and end turn
+                goFish(comCards);
+                message = `Now it's your turn. Pick a card.`
+                updateLog(message)
+            } 
+        }
+        if (comCards.length === 0) {
+            // empty computer hand draws a card
             goFish(comCards);
             message = `Now it's your turn. Pick a card.`
             updateLog(message)
@@ -321,6 +291,7 @@ const render = () => {
     showHands();;    
     playerCards = removePairs(playerCards);
     comCards = removePairs(comCards);
+    displayEl.style.visibility = 'visible';
     turns();
 }
 
@@ -329,7 +300,6 @@ const init = () => {
     deal();
     gameOn = true;
     playerTurn = true;
-    displayEl.style.visibility = 'visible';
     render();
 };
 
@@ -340,39 +310,47 @@ const handleTurn = (event) => {
     // set a condition for when a card is pickable and unpickable
     if (playerTurn === true && btnEl.innerText !== 'Go fish!') {
         
-        // check comCards for a match
-        for (let i = 0; i <comCards.length; i++) {
-            let comCard = comCards[i];
-            let match = comCards[i][1]+comCards[i][2];
+        // check if computer has any cards
+        if (comCards.length > 0) {
 
-            // set the element in case of a match
-            comCardEl = document.getElementsByClassName(comCard);
+            // check comCards for a match
+            for (let i = 0; i <comCards.length; i++) {
+                let comCard = comCards[i];
+                let match = comCards[i][1]+comCards[i][2];
 
-            if (rank === match) {
-                // message the results
-                message = `It's a match! They also had a ${rank}!`
-                updateLog()
-                
-                // move the card to the playerCards array
-                playerCards.push(comCard);
+                // set the element in case of a match
+                comCardEl = document.getElementsByClassName(comCard);
 
-                newCardEl.classList.add("card", playerCards[playerCards.length-1]);
-                handEl.appendChild(newCardEl);
+                if (rank === match) {
+                    // message the results
+                    message = `It's a match! They also had a ${rank}!`
+                    updateLog()
+                    
+                    // move the card to the playerCards array
+                    playerCards.push(comCard);
 
-                // remove the card from origin
-                comCards.splice(i,1);
-                comCardEl[0].parentNode.removeChild(comCardEl[0]);
+                    newCardEl.classList.add("card", playerCards[playerCards.length-1]);
+                    handEl.appendChild(newCardEl);
 
-                // remove the pair
-                playerCards = removePairs(playerCards);
+                    // remove the card from origin
+                    comCards.splice(i,1);
+                    comCardEl[0].parentNode.removeChild(comCardEl[0]);
 
-                // check game state
-                checkCards()
+                    // remove the pair
+                    playerCards = removePairs(playerCards);
 
-                // return to allow the player to pick another card
-                rank = '';
-                return;
+                    // check game state
+                    checkCards()
+
+                    // return to allow the player to pick another card
+                    rank = '';
+                    return;
+                }
             }
+        } else {
+            message = `Looks like the computer has no cards to ask for. Go fish.`
+            btnEl.innerText = 'Go fish!'
+            btnEl.style.visibility = 'visible'
         }
     // create failure message
     message = `Oops, looks like the computer doesn't have a match for a ${rank}. Let's go fish!`;
