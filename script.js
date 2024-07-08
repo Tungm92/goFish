@@ -41,22 +41,17 @@
 // declare variables
 
 const gameLog = [];
-
-
 const names = ['you', 'the computer'];
 const scores = [0, 0];
-const playerCards = [];
-const comCards = [];
-const matches =[];
+
 
 let deck = ["dA0","dQ0","dK0","dJ0","d10","d09","d08","d07","d06","d05","d04","d03","d02","hA0","hQ0","hK0","hJ0","h10","h09","h08","h07","h06","h05","h04","h03","h02","cA0","cQ0","cK0","cJ0","c10","c09","c08","c07","c06","c05","c04","c03","c02","sA0","sQ0","sK0","sJ0","s10","s09","s08","s07","s06","s05","s04","s03","s02"]
-let currentPlayer
+let playerCards = [];
+let comCards = [];
 let rank
 let message
-
-
-
-
+let playerTurn = false;
+let gameOn = false;
 
 // cached element references
 
@@ -69,31 +64,31 @@ let displayEl = document.querySelector('#display');
 
 // functions 
 
-const deal = () => { // this pushes the cards into the hands of the player(s) 
+// push the cards into the hands of the player(s)
+const deal = () => { 
     while (playerCards.length < 7) {
         comCards.push(deck.pop());
         playerCards.push(deck.pop());
     };
 };
 
-const checkCards = () => { // this checks the state of the game and if it is over 
-
-    // this checks for matches in the computer's hand
+// check the state of the game
+const checkCards = () => {
     if (deck.length === 0 && playerHand.length === 0) {
         message = `Great game! Let's check the final score.`;
-        gameLog.push(message);
-        gameLogging();
-        currentPlayer = 'game over';
+        updateLog();
+        playerTurn = false;
+        gameOn = false
         finalScore();
     } 
     if (deck.length > 0 && playerCards.length < 1) {
         message = `Looks like you're out of cards. Go fish!`;
-        gameLog.push(message);
-        gameLogging();
+        updateLog();
     };
 };
 
-const shuffle = (deck) => { // this shuffles the deck array 
+// shuffle the cards
+const shuffle = (deck) => {
     for (var i = deck.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random()*(i+1));
         const temp = deck[i];
@@ -102,7 +97,8 @@ const shuffle = (deck) => { // this shuffles the deck array
     };
 };
 
-const showHands = () => { // this creates the card elements in the browser 
+// render the cards in browser
+const showHands = () => { 
     playerCards.forEach(card => {
         const newCardEl = document.createElement('li');
         newCardEl.classList.add("card", card);
@@ -115,156 +111,255 @@ const showHands = () => { // this creates the card elements in the browser
     });
 };
 
-const checkStart = () => { // checking the both hands for matches at start
-    for (i = 0; i < playerCards.length; i++) {
-        let rank = playerCards[i][1]+playerCards[i][2];
-        let tempArray = [...playerCards];
-        tempArray.splice(i,1,'');
-        for (idx of tempArray) {
-            if (idx !== '') {
-                let match = idx[1]+idx[2];
-                if (match === rank) {
-                    let playerCardEl1 = document.getElementsByClassName(playerCards[i]);
-                    playerCardEl1[0].parentNode.removeChild(playerCardEl1[0]);
-                    playerCards.splice(i,1); // removes the card from the hand
-                    tempArray.splice(i,1); // tempArray has to match the array length and positions of the original
-                    // card2 has to be declared after the splice of card1 or else it removes the wrong card
-                    let playerCardEl2 = document.getElementsByClassName(playerCards[playerCards.findIndex(element => element.includes(`${match}`))]);
-                    playerCardEl2[0].parentNode.removeChild(playerCardEl2[0]);
-                    playerCards.splice(playerCards.findIndex(element => element.includes(`${match}`)),1);
-                    tempArray.splice(tempArray.findIndex(element => element.includes(`${match}`)),1);
-                    match = idx[1]+idx[2]; // updating the match card ensures it only removes pairs and three-of-a-kind
-                    scores[0] = scores[0]+1; // this increments the score by 1 each successful pairing
-                    message = `You got a pair of ${rank}'s! Let's put that away. Your score is now ${scores[0]}.`;
-                    gameLog.push(message);
-                    gameLogging();
-                };  
-            };
-        };
-    };
-    for (i = 0; i < comCards.length; i++) {
-        let rank = comCards[i][1]+comCards[i][2];
-        let tempArray = [...comCards];
-        tempArray.splice(i,1,'');
-        for (idx of tempArray) {
-            if (idx !== '') {
-                let match = idx[1]+idx[2];
-                if (match === rank) {
-                    let playerCardEl1 = document.getElementsByClassName(comCards[i])
-                    playerCardEl1[0].parentNode.removeChild(playerCardEl1[0])
-                    comCards.splice(i,1) // removes the card from the hand
-                    tempArray.splice(i,1) // tempArray has to match the array length and positions of the original
-                    // card2 has to be declared after the splice of card1 or else it removes the wrong card
-                    let playerCardEl2 = document.getElementsByClassName(comCards[comCards.findIndex(element => element.includes(`${match}`))])
-                    playerCardEl2[0].parentNode.removeChild(playerCardEl2[0])
-                    comCards.splice(comCards.findIndex(element => element.includes(`${match}`)),1)
-                    tempArray.splice(tempArray.findIndex(element => element.includes(`${match}`)),1)
-                    match = idx[1]+idx[2] // updating the match card ensures it only removes pairs and three-of-a-kind
-                    scores[1] = scores[1]+1 // this increments the score by 1 each successful pairing
-                };  
-            };
-        };
-    };
-};
+// create a function to remove pairs at any point in the game
+const removePairs = (arrayOfCards) => {
 
-const turns = () => {
-    if (currentPlayer === 'Player 1') {
-        message = `It's your turn. Click on the card you want to make a pair with.`;
-        gameLog.push(message);
-        gameLogging();
+    for (i = 0; i < arrayOfCards.length; i++) {
+        // store the value of the card that we are comparing to the rest of the deck
+        let firstCard = arrayOfCards[i][1]+arrayOfCards[i][2];
+
+        for (j = 0; j < arrayOfCards.length; j++) {
+
+            // skip the card if it is the same index as firstCard
+            // or if it has already been spliced
+            if (j != i && arrayOfCards[i] != '' && arrayOfCards[j] != '') {
+
+                // store the value of the card that we are comparing the firstCard agaist
+                let secondCard = arrayOfCards[j][1]+arrayOfCards[j][2];
+
+                //console.log(i, j, firstCard, secondCard);
+
+                // if there is a match, set the card values to ''
+                if (firstCard === secondCard) {
+
+                    // log the points for the player
+                    if (arrayOfCards === playerCards) {
+                        scores[0] = scores[0]+1
+                        message = `You paired your ${firstCard} with your ${secondCard}. Your score is now ${scores[0]}.`
+                        gameLog.push(message)
+                        updateLog()
+                    }
+
+                    // log the points for the computer
+                    if (arrayOfCards === comCards) {
+                        scores[1] = scores[1]+1
+                        message = `The computer had a pair of ${firstCard}'s. Their score is now ${scores[1]}.`
+                        gameLog.push(message)
+                        updateLog()
+                    }
+                    
+                    // cache the element before they are changed
+                    let cardEl1 = document.getElementsByClassName(arrayOfCards[i])
+                    let cardEl2 = document.getElementsByClassName(arrayOfCards[j])               
+                    
+                    // make all pairs an empty string to avoid three of a kinds
+                    arrayOfCards.splice(i, 1, '');
+                    arrayOfCards.splice(j, 1, '');
+                    
+                    // remove html using i and j as indexes to find matching value
+                    cardEl1[0].parentNode.removeChild(cardEl1[0])
+                    cardEl2[0].parentNode.removeChild(cardEl2[0])
+                    
+                }
+            }            
+        }        
     }
-    while (currentPlayer === 'Computer') {
-        
-    }
+    // after we have found all pairs, filter the array for values that are not '' (do not have a pair)
+    let result = arrayOfCards.filter((card) => card != '');
+    return result;
 }
-const goFish = () => {
+
+
+// create a function to take turns
+// const turns = () => {
+//     while (gameOn = true) {
+//         if (playerTurn = true) {
+//             message = `It's your turn. Click on the card you want to make a pair with.`;
+//             updateLog();
+//         }
+
+//         // create computer logic for the computer's turn
+//         if (playerTurn = false) {
+
+//             // the computer selects a card
+//             let comCard = comCards[Math.floor(Math.random()*comCards.length)]
+//             rank = comCard[1]+comCard[2]
+
+//             message = `The computer asks for a ${comCard}.`
+//             updateLog(message)
+            
+//             // compare the selected card with the player's cards
+//             for (let i=0; i < playerCards; i++) {
+//                 let playerCard = playerCards[i]
+//                 let match = playerCards[i][1]+playerCards[i][2]
+
+//                 // set the element in case of a match
+//                 let playerCardEl = document.getElementsByClassName(playerCard)
+                
+//                 if (rank === match) {
+//                     // move the card to the comCards array
+//                     comCards.push(playerCard);
+
+//                     // remove the card from the array and browser
+//                     playerCards.splice(i,1);
+//                     playerCardEl[0].parentNode.removeChild(playerCardEl[0]);
+                    
+//                     // remove the pair using the removePairs()
+//                     removePairs(comCards);
+
+//                     // check game state
+//                     checkCards();
+//                 }
+
+//                 // message computer's results
+//                 message = `The computer asked for a ${rank} but you didn't have one so it had to go fish!`;
+//                 updateLog();
+                
+//                 // computer grabs a card and end turn
+//                 goFish(comCards);
+//             }
+//         }
+//     }
+// }
+    
+const goFish = (arrayOfCards) => {
+    
+    // add new card to the array
     const newCardEl = document.createElement('li');
-    playerCards.push(deck.pop());
-    newCardEl.classList.add("card", playerCards[playerCards.length-1]);
-    handEl.appendChild(newCardEl);
-    currentPlayer = 'Computer';
-    checkStart(); // this checks if the new drawn card matches with the player's hand or the com's hand.
-    checkCards();
+    arrayOfCards.push(deck.pop());
+
+    // if player's turn add new card to the player's hand
+    if (arrayOfCards === playerCards) {
+        newCardEl.classList.add("card", playerCards[playerCards.length-1]);
+        handEl.appendChild(newCardEl);
+
+        // message the results
+        message = `You picked up a ${playerCards[playerCards.length-1]}.`
+        updateLog();
+
+        // check for pairs
+        playerCards = removePairs(playerCards);
+        
+        // check state of the game
+        checkCards();
+
+        // change turns
+        playerTurn = false;
+    }
+    
+    // if computer's turn add new card to the computer's hand
+    if (arrayOfCards === comCards) {
+        newCardEl.classList.add("card", "back-blue", comCards[comCards.length-1]);
+        comEl.appendChild(newCardEl);
+
+        // message the results
+        message = `The computer picked up a card!`
+        updateLog();
+
+        // check for pairs
+        comCards = removePairs(comCards);
+
+        // check state of the game
+        checkCards();
+
+        // change turns
+        playerTurn = true;
+    }
 };
-const comFish = () => {
-    if (currentPlayer === 'Computer') {
-    comCards.push(deck.pop());
-    newCardEl.classList.add("card", "back-blue", comCards[comCards.length-1]);
-    comEl.appendChild(newCardEl);
-    currentPlayer = 'Player 1';
-    };
-}
 
 const finalScore = () => {
     let highScore = Math.max.apply(Math, scores);
     if (playerScore === comScore) {
         message = `It's a tie! You both scored ${playerScore}!`;
-        gameLog.push(message);
-        gameLogging();
+        updateLog();
         btnEl.style.visibility = 'visible'
     } else {
-        let scoreIndex = scores.indexOf(highScore); // this gets index of the highest score in the scores array
+        
+        // get the index of the highest score
+        let scoreIndex = scores.indexOf(highScore);
         let winner = names[scoreIndex];
         message = `And the winner is... ${winner}`;
-        gameLog.push(message);
-        gameLogging();
-        btnEl.innerText = 'Start a New Game'
-        btnEl.style.visibility = 'visible'
+        updateLog();
+        btnEl.innerText = 'Start a New Game';
+        btnEl.style.visibility = 'visible';
     }
 }
 
-const gameLogging = () => {
+const updateLog = (v) => {
+    gameLog.push(message)
     const newMessageEl = document.createElement('li');
     newMessageEl.innerText = gameLog[gameLog.length-1];
     displayEl.appendChild(newMessageEl);
     displayEl.style.visibility = 'visible';
 }
 
+const handleTurn = (event) => {
+    // create a var to hold the value card selected
+    rank = event.target.classList[1][1]+event.target.classList[1][2]
+    
+    // set a condition for when a card is pickable and unpickable
+    while (playerTurn = true) {
+        if (btnEl.innerText !== 'Go fish!') {
+            
+            // check comCards for a match
+            for (let i = 0; i <comCards.length; i++) {
+                let comCard = comCards[i];
+                let match = comCards[i][1]+comCards[i][2];
+
+                // set the element in case of a match
+                comCardEl = document.getElementsByClassName(comCard);
+
+                if (rank === match) {
+                    // move the card to the playerCards array
+                    playerCards.push(comCard);
+
+                    // remove the card from origin
+                    comCards.splice(i,1);
+                    comCardEl[0].parentNode.removeChild(comCardEl[0]);
+
+                    // remove the pair
+                    removePairs(playerCards);
+
+                    // check game state
+                    checkCards()
+                }
+            }
+        }
+        // create failure message
+        message = `Oops, looks like the computer doesn't have a match. Let's go fish!`
+        updateLog()
+        btnEl.innerText = 'Go fish!'
+        btnEl.style.visibility = 'visible'
+    }
+}
+
 const render = () => {
-    checkCards();
     showHands();
-    checkStart();
-    currentPlayer = 'Player 1';
-    turns();
+    // turns();
+    // console.log(playerCards, 'start playerCards');
+    // console.log(comCards, 'start comCards');    
+    playerCards = removePairs(playerCards);
+    comCards = removePairs(comCards);
+    // console.log(playerCards, 'end player cards');
+    // console.log(comCards, 'end com cards');
+    checkCards();
+    displayEl.style.visibility = 'visible';
 }
 
 const init = () => {
     shuffle(deck);
     deal();
     render();
-    console.log(`these are the com's cards ${comCards}, and these are your cards ${playerCards}`)
+    
+    gameOn = true;
+    playerTurn = true;
+    console.log(`these are the com's cards ${comCards}, and these are your cards ${playerCards}`);
 };
 
 // event listeners
 
 handEl.addEventListener('click', (event) => {
-    rank = String(event.target.classList[1][1])+String(event.target.classList[1][2])
-    if (currentPlayer === 'Player 1' && rank !== '') {
-        for (let i = 0; i < comCards.length; i++) {
-            let comCardEl = document.getElementsByClassName(comCards[i])
-            let match = String(comCards[i][1]+comCards[i][2])
-            let myCard = event.target.classList[1]
-            if (rank === match) {
-                scores[0] = scores[0]+1 // increase player score by 1
-                matches.push(myCard) // saving this to show the player's card in the middle of the table
-                matches.push(comCards[i]) // saving this to show the computer's card in the middle of the table
-                message = `It's a match! The computer had a ${comCards[i]}. You have ${scores[0]} points.`
-                gameLog.push(message)
-                gameLogging()
-                event.target.remove() // this removes the HTML element from .hand
-                playerCards.splice(playerCards.indexOf(myCard),1) // this removes the corresponding array element
-                comCardEl[0].parentNode.removeChild(comCardEl[0]) // this removes the HTML element from computer
-                comCards.splice(i,1) // this removes the corresponding array element
-                return
-            }
-        }
-        message = `Oops, looks like the computer doesn't have a match. Let's go fish!`
-        gameLog.push(message)
-        gameLogging()
-        currentPlayer = 'Fishing'
-        btnEl.innerText = 'Go fish!'
-        btnEl.style.visibility = 'visible'
-    }
+    handleTurn(event)
 });
 
 btnEl.addEventListener('click', (event) => {
