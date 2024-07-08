@@ -58,6 +58,7 @@ let gameOn = false;
 let handEl = document.querySelector('.hand');
 let comEl = document.querySelector('.computer-player');
 let deckEl = document.querySelector('#deck');
+let newCardEl = document.createElement('li');
 let btnEl = document.querySelector('#btn');
 let displayEl = document.querySelector('#display');
 
@@ -77,13 +78,13 @@ const checkCards = () => {
     if (deck.length === 0 && playerHand.length === 0) {
         message = `Great game! Let's check the final score.`;
         updateLog();
-        playerTurn = false;
-        gameOn = false
         finalScore();
     } 
     if (deck.length > 0 && playerCards.length < 1) {
         message = `Looks like you're out of cards. Go fish!`;
         updateLog();
+        btnEl.innerText = 'Go fish!'
+        btnEl.style.visibility = 'visible';
     };
 };
 
@@ -99,13 +100,17 @@ const shuffle = (deck) => {
 
 // render the cards in browser
 const showHands = () => { 
+    
+    // render player hand
     playerCards.forEach(card => {
-        const newCardEl = document.createElement('li');
+        let newCardEl = document.createElement('li');
         newCardEl.classList.add("card", card);
         handEl.appendChild(newCardEl);
     });
+
+    // render back of comCards
     comCards.forEach(card => {
-        const newCardEl = document.createElement('li');
+        let newCardEl = document.createElement('li');
         newCardEl.classList.add("card","back-blue", card);
         comEl.appendChild(newCardEl);
     });
@@ -127,15 +132,13 @@ const removePairs = (arrayOfCards) => {
                 // store the value of the card that we are comparing the firstCard agaist
                 let secondCard = arrayOfCards[j][1]+arrayOfCards[j][2];
 
-                //console.log(i, j, firstCard, secondCard);
-
                 // if there is a match, set the card values to ''
                 if (firstCard === secondCard) {
 
                     // log the points for the player
                     if (arrayOfCards === playerCards) {
                         scores[0] = scores[0]+1
-                        message = `You paired your ${firstCard} with your ${secondCard}. Your score is now ${scores[0]}.`
+                        message = `You paired your ${arrayOfCards[i]} with your ${arrayOfCards[j]}. Your score is now ${scores[0]}.`
                         gameLog.push(message)
                         updateLog()
                     }
@@ -143,7 +146,7 @@ const removePairs = (arrayOfCards) => {
                     // log the points for the computer
                     if (arrayOfCards === comCards) {
                         scores[1] = scores[1]+1
-                        message = `The computer had a pair of ${firstCard}'s. Their score is now ${scores[1]}.`
+                        message = `The computer put away a pair of ${firstCard}s. Their score is now ${scores[1]}.`
                         gameLog.push(message)
                         updateLog()
                     }
@@ -151,85 +154,101 @@ const removePairs = (arrayOfCards) => {
                     // cache the element before they are changed
                     let cardEl1 = document.getElementsByClassName(arrayOfCards[i])
                     let cardEl2 = document.getElementsByClassName(arrayOfCards[j])               
-                    
-                    // make all pairs an empty string to avoid three of a kinds
-                    arrayOfCards.splice(i, 1, '');
-                    arrayOfCards.splice(j, 1, '');
-                    
+
                     // remove html using i and j as indexes to find matching value
                     cardEl1[0].parentNode.removeChild(cardEl1[0])
                     cardEl2[0].parentNode.removeChild(cardEl2[0])
-                    
+
+                    // make all pairs an empty string to avoid three of a kinds
+                    arrayOfCards.splice(i, 1, '');
+                    arrayOfCards.splice(j, 1, '');
                 }
             }            
         }        
     }
+    console.log(comCards.length)
+    console.log(comCards)
+    console.log(playerCards.length)
+    console.log(playerCards)
+
     // after we have found all pairs, filter the array for values that are not '' (do not have a pair)
     let result = arrayOfCards.filter((card) => card != '');
     return result;
 }
 
-
 // create a function to take turns
-// const turns = () => {
-//     while (gameOn = true) {
-//         if (playerTurn = true) {
-//             message = `It's your turn. Click on the card you want to make a pair with.`;
-//             updateLog();
-//         }
+const turns = () => {
+    if (gameOn === true) {
+        
+        // create computer logic for the computer's turn
+        if (playerTurn === false) {
 
-//         // create computer logic for the computer's turn
-//         if (playerTurn = false) {
+            // the computer selects a card
+            let comCard = comCards[Math.floor(Math.random()*comCards.length)]
+            rank = comCard[1]+comCard[2]
 
-//             // the computer selects a card
-//             let comCard = comCards[Math.floor(Math.random()*comCards.length)]
-//             rank = comCard[1]+comCard[2]
+            // message the result
+            message = `The computer asks for a ${comCard}.`
+            updateLog(message)
 
-//             message = `The computer asks for a ${comCard}.`
-//             updateLog(message)
-            
-//             // compare the selected card with the player's cards
-//             for (let i=0; i < playerCards; i++) {
-//                 let playerCard = playerCards[i]
-//                 let match = playerCards[i][1]+playerCards[i][2]
-
-//                 // set the element in case of a match
-//                 let playerCardEl = document.getElementsByClassName(playerCard)
+            // compare the selected card with the player's cards
+            for (let i=0; i < playerCards.length; i++) {
+                let playerCard = playerCards[i]
+                let match = playerCard[1]+playerCard[2]
                 
-//                 if (rank === match) {
-//                     // move the card to the comCards array
-//                     comCards.push(playerCard);
-
-//                     // remove the card from the array and browser
-//                     playerCards.splice(i,1);
-//                     playerCardEl[0].parentNode.removeChild(playerCardEl[0]);
+                // set the element in case of a match
+                let playerCardEl = document.getElementsByClassName(playerCard)
+                
+                if (rank === match) {
                     
-//                     // remove the pair using the removePairs()
-//                     removePairs(comCards);
+                    // message the result
+                    message = `Looks like they got your ${playerCard}.`
+                    updateLog(message)
 
-//                     // check game state
-//                     checkCards();
-//                 }
+                    // move the card to the comCards array
+                    comCards.push(playerCard);
+                    newCardEl.classList.add("card", "back-blue", comCards[comCards.length-1]);
+                    comEl.appendChild(newCardEl);
 
-//                 // message computer's results
-//                 message = `The computer asked for a ${rank} but you didn't have one so it had to go fish!`;
-//                 updateLog();
-                
-//                 // computer grabs a card and end turn
-//                 goFish(comCards);
-//             }
-//         }
-//     }
-// }
-    
+                    // remove the card from the array and browser
+                    playerCards.splice(i,1);
+                    playerCardEl[0].parentNode.removeChild(playerCardEl[0]);
+                    
+                    // remove the pair using the removePairs()
+                    comCards = removePairs(comCards);
+
+                    // check game state
+                    checkCards();
+
+                    // add a condition to continue picking cards
+                    if (comCards.length > 0) {
+                        comCard = comCards[Math.floor(Math.random()*comCards.length)]
+                        rank = comCard[1]+comCard[2]
+                        playerCardEl = document.getElementsByClassName(playerCard)
+                    }
+                }
+            }
+
+            // message computer's results
+            message = `But you don't have one so it had to go fish!`;
+            updateLog();
+            
+            // computer grabs a card and end turn
+            goFish(comCards);
+            message = `Now it's your turn. Pick a card.`
+            updateLog(message)
+        }
+    }
+}
+
 const goFish = (arrayOfCards) => {
-    
-    // add new card to the array
-    const newCardEl = document.createElement('li');
+
+    // add new card to the array 
     arrayOfCards.push(deck.pop());
 
     // if player's turn add new card to the player's hand
     if (arrayOfCards === playerCards) {
+        let newCardEl = document.createElement('li');
         newCardEl.classList.add("card", playerCards[playerCards.length-1]);
         handEl.appendChild(newCardEl);
 
@@ -245,15 +264,17 @@ const goFish = (arrayOfCards) => {
 
         // change turns
         playerTurn = false;
+        turns();
     }
     
     // if computer's turn add new card to the computer's hand
     if (arrayOfCards === comCards) {
+
         newCardEl.classList.add("card", "back-blue", comCards[comCards.length-1]);
         comEl.appendChild(newCardEl);
 
         // message the results
-        message = `The computer picked up a card!`
+        message = `The computer picked up a card.`
         updateLog();
 
         // check for pairs
@@ -268,19 +289,23 @@ const goFish = (arrayOfCards) => {
 };
 
 const finalScore = () => {
+    playerTurn = false;
+    gameOn = false;
     let highScore = Math.max.apply(Math, scores);
     if (playerScore === comScore) {
         message = `It's a tie! You both scored ${playerScore}!`;
         updateLog();
-        btnEl.style.visibility = 'visible'
+        btnEl.innerText = 'Start a Game';
+        btnEl.style.visibility = 'visible';
     } else {
-        
+
         // get the index of the highest score
         let scoreIndex = scores.indexOf(highScore);
+        
         let winner = names[scoreIndex];
-        message = `And the winner is... ${winner}`;
+        message = `And the winner is... ${winner}! Want to play again?`;
         updateLog();
-        btnEl.innerText = 'Start a New Game';
+        btnEl.innerText = 'Start a Game';
         btnEl.style.visibility = 'visible';
     }
 }
@@ -290,71 +315,73 @@ const updateLog = (v) => {
     const newMessageEl = document.createElement('li');
     newMessageEl.innerText = gameLog[gameLog.length-1];
     displayEl.appendChild(newMessageEl);
-    displayEl.style.visibility = 'visible';
 }
+
+const render = () => {
+    showHands();;    
+    playerCards = removePairs(playerCards);
+    comCards = removePairs(comCards);
+    turns();
+}
+
+const init = () => {
+    shuffle(deck);
+    deal();
+    gameOn = true;
+    playerTurn = true;
+    displayEl.style.visibility = 'visible';
+    render();
+};
 
 const handleTurn = (event) => {
     // create a var to hold the value card selected
     rank = event.target.classList[1][1]+event.target.classList[1][2]
     
     // set a condition for when a card is pickable and unpickable
-    while (playerTurn = true) {
-        if (btnEl.innerText !== 'Go fish!') {
-            
-            // check comCards for a match
-            for (let i = 0; i <comCards.length; i++) {
-                let comCard = comCards[i];
-                let match = comCards[i][1]+comCards[i][2];
+    if (playerTurn === true && btnEl.innerText !== 'Go fish!') {
+        
+        // check comCards for a match
+        for (let i = 0; i <comCards.length; i++) {
+            let comCard = comCards[i];
+            let match = comCards[i][1]+comCards[i][2];
 
-                // set the element in case of a match
-                comCardEl = document.getElementsByClassName(comCard);
+            // set the element in case of a match
+            comCardEl = document.getElementsByClassName(comCard);
 
-                if (rank === match) {
-                    // move the card to the playerCards array
-                    playerCards.push(comCard);
+            if (rank === match) {
+                // message the results
+                message = `It's a match! They also had a ${rank}!`
+                updateLog()
+                
+                // move the card to the playerCards array
+                playerCards.push(comCard);
 
-                    // remove the card from origin
-                    comCards.splice(i,1);
-                    comCardEl[0].parentNode.removeChild(comCardEl[0]);
+                newCardEl.classList.add("card", playerCards[playerCards.length-1]);
+                handEl.appendChild(newCardEl);
 
-                    // remove the pair
-                    removePairs(playerCards);
+                // remove the card from origin
+                comCards.splice(i,1);
+                comCardEl[0].parentNode.removeChild(comCardEl[0]);
 
-                    // check game state
-                    checkCards()
-                }
+                // remove the pair
+                playerCards = removePairs(playerCards);
+
+                // check game state
+                checkCards()
+
+                // return to allow the player to pick another card
+                rank = '';
+                return;
             }
         }
-        // create failure message
-        message = `Oops, looks like the computer doesn't have a match. Let's go fish!`
-        updateLog()
-        btnEl.innerText = 'Go fish!'
-        btnEl.style.visibility = 'visible'
+    // create failure message
+    message = `Oops, looks like the computer doesn't have a match for a ${rank}. Let's go fish!`;
+    updateLog();
+    btnEl.innerText = 'Go fish!';
+    btnEl.style.visibility = 'visible';
     }
-}
+}   
 
-const render = () => {
-    showHands();
-    // turns();
-    // console.log(playerCards, 'start playerCards');
-    // console.log(comCards, 'start comCards');    
-    playerCards = removePairs(playerCards);
-    comCards = removePairs(comCards);
-    // console.log(playerCards, 'end player cards');
-    // console.log(comCards, 'end com cards');
-    checkCards();
-    displayEl.style.visibility = 'visible';
-}
-
-const init = () => {
-    shuffle(deck);
-    deal();
-    render();
-    
-    gameOn = true;
-    playerTurn = true;
-    console.log(`these are the com's cards ${comCards}, and these are your cards ${playerCards}`);
-};
 
 // event listeners
 
@@ -364,7 +391,7 @@ handEl.addEventListener('click', (event) => {
 
 btnEl.addEventListener('click', (event) => {
     if (event.target.innerText === 'Go fish!') {
-        goFish();
+        goFish(playerCards);
         btnEl.style.visibility = 'hidden';
     }
     if (event.target.innerText === 'Start a Game') {
