@@ -87,7 +87,7 @@ const removePairs = (arrayOfCards) => {
 
             // skip the card if it is the same index as firstCard
             // or if it has already been spliced
-            if (j != i && arrayOfCards[i] != '' && arrayOfCards[j] != '') {
+            if (j !== i && arrayOfCards[i] !== '' && arrayOfCards[j] !== '') {
 
                 // store the value of the card that we are comparing the firstCard agaist
                 let secondCard = arrayOfCards[j][1]+arrayOfCards[j][2];
@@ -115,8 +115,12 @@ const removePairs = (arrayOfCards) => {
                     let cardEl1 = document.getElementsByClassName(arrayOfCards[i])
                     let cardEl2 = document.getElementsByClassName(arrayOfCards[j])               
 
+                    // console.log(arrayOfCards[i])
+                    // console.log(arrayOfCards[j])
                     // remove html using i and j as indexes to find matching value
+                    // console.log(cardEl1, cardEl1[0])
                     cardEl1[0].parentNode.removeChild(cardEl1[0])
+                    // console.log(cardEl2, cardEl2[0])
                     cardEl2[0].parentNode.removeChild(cardEl2[0])
 
                     // make all pairs an empty string to avoid three of a kinds
@@ -126,15 +130,18 @@ const removePairs = (arrayOfCards) => {
             }            
         }        
     }
-    console.log(comCards.length)
-    console.log(comCards)
-    console.log(playerCards.length)
-    console.log(playerCards)
+    // console.log(comCards.length)
+    // console.log(comCards)
+    // console.log(playerCards.length)
+    // console.log(playerCards)
 
     // after we have found all pairs, filter the array for values that are not '' (do not have a pair)
-    let result = arrayOfCards.filter((card) => card != '');
+    let result = arrayOfCards.filter((card) => card !== '');
+    console.log('after filter(): ', comCards)
+    console.log('after filter(): ', playerCards)
     return result;
 }
+
 
 // create a function to take turns
 const turns = () => {
@@ -215,13 +222,13 @@ const goFish = (arrayOfCards) => {
 
     // add new card to the array 
     arrayOfCards.push(deck.pop());
-
+    console.log('this is the deck ', deck)
     // if player's turn add new card to the player's hand
     if (arrayOfCards === playerCards) {
-        let newCardEl = document.createElement('li');
+        console.log(arrayOfCards, ' this is the player cards', playerCards)
         newCardEl.classList.add("card", playerCards[playerCards.length-1]);
         handEl.appendChild(newCardEl);
-
+        
         // message the results
         message = `You picked up a ${playerCards[playerCards.length-1]}.`
         updateLog();
@@ -235,6 +242,8 @@ const goFish = (arrayOfCards) => {
         // change turns
         playerTurn = false;
         turns();
+
+        // console.log('player turn')
     }
     
     // if computer's turn add new card to the computer's hand
@@ -255,6 +264,8 @@ const goFish = (arrayOfCards) => {
 
         // change turns
         playerTurn = true;
+
+        // console.log('com turn')
     }
 };
 
@@ -304,9 +315,12 @@ const init = () => {
 };
 
 const handleTurn = (event) => {
+    
+    // make the 
+
     // create a var to hold the value card selected
     rank = event.target.classList[1][1]+event.target.classList[1][2]
-    
+
     // set a condition for when a card is pickable and unpickable
     if (playerTurn === true && btnEl.innerText !== 'Go fish!') {
         
@@ -328,7 +342,6 @@ const handleTurn = (event) => {
                     
                     // move the card to the playerCards array
                     playerCards.push(comCard);
-
                     newCardEl.classList.add("card", playerCards[playerCards.length-1]);
                     handEl.appendChild(newCardEl);
 
