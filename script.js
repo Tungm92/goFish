@@ -12,6 +12,9 @@ let rank
 let message
 let playerTurn = false;
 let gameOn = false;
+let handEmpty = false;
+let comEmpty = false;
+let deckEmpty = false;
 
 // cached element references
 
@@ -40,11 +43,52 @@ const checkCards = () => {
         updateLog();
         finalScore();
     } 
-    if (deck.length > 0 && playerCards.length < 1) {
-        message = `Looks like you're out of cards. Go fish!`;
-        updateLog();
-        btnEl.innerText = 'Go fish!'
-        btnEl.style.visibility = 'visible';
+
+    if (deck.length > 0 && arrayOfCards.length < 1) {
+
+        if (playerTurn) {
+            message = `Looks like you're out of cards. Go fish!`;
+            updateLog();
+            btnEl.innerText = 'Go fish!';
+            btnEl.style.visibility = 'visible';
+        } else {
+            message = `The computer is out of cards so it draws a new card.`;
+            updateLog();
+            goFish(comCards)
+    
+
+    // what are the ways cards can be empty during a playerTurn?
+    // deck empty, hand empty, opponent empty
+    // deck empty, hand last card, opponent last card
+    // deck !empty, hand empty, opponent hand empty
+    // deck !empty, hand empty, opponent hand !empty
+    // deck !empty, hand !empty, opponent empty
+    // deck !empty, hand !empty, opponent !empty
+
+    // what are the points you checkCards?
+    // at the start of turn?
+    // after goFish can be at the start of a turn
+    // after a match of cards
+
+    // why not make a boolean for each hand? 
+    // handEmpty = false
+    // comEmpty = false
+    // deckEmpty = false
+    // const isGameOn = () => {
+    // if (handEmpty && comEmpty && deckEmpty) {
+    // gameOn = false}} 
+
+    // operate the btnEl on two conditions:
+    // if (playerTurn && handEmpty) {
+    // btnEl.style.visibility = 'visible'}
+    // } else {
+    // btn.El.style.visibility = 'hidden'}
+
+    // this will style.visibility the btn
+    // this will send the message if a palyer is out of cards
+    // this will send the goFish message of either player and their result
+    // this will save your life
+        };
     };
 };
 
