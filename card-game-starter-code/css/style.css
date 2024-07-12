@@ -20,14 +20,14 @@ body {
 }
 
 .card.outline {
-  border: 0.15em dashed #202d7a;
+  border: 0.25em dashed #202d7a;
 }
 
 .card.shadow {
   box-shadow: 7px 7px 7px 0 rgba(41, 41, 41, 0.95) !important;
 }
 
-.btn {
+#play {
   margin: 2vmax;
   padding: .8rem;
   border-radius: 5px;
@@ -84,7 +84,7 @@ header {
   box-shadow: 7px 7px 7px 0 rgba(41, 41, 41, 0.95)
 }
 
-footer .btn {
+#forfeit {
   margin: 2vmax;
   padding: .8rem;
   border-radius: 5px;
@@ -94,5 +94,14 @@ footer .btn {
   font-weight:bolder;
   border: 2px solid #202d7a;
   box-shadow: 7px 7px 7px 0 rgba(41, 41, 41, 0.95);
-  visibility: visible;
+  visibility: hidden;
+}
+
+#center {
+  display: flex;
+  flex-direction: column;
+}
+
+#hidden-cache {
+  visibility: hidden;
 }

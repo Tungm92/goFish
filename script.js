@@ -12,9 +12,6 @@ let rank
 let message
 let comTurn = false;
 let gameOn = false;
-let handEmpty = false;
-let comEmpty = false;
-let deckEmpty = false;
 let noMatch = false;
 
 // cached element references
@@ -67,32 +64,15 @@ const showHands = () => {
 // check the state of the game
 const checkCards = () => {
     
-    // check player cards
-    if (playerCards.length === 0) {
-        handEmpty = true;
+    // run check of game
+    if (playerCards.length === 0 && comCards.length === 0 && playerCards.length === 0) {
+        gameOn = false
     };
-
-    // check computer cards
-    if (comCards.length === 0) {
-        comEmpty = true;
-    };
-
-    // check deck
-    if (deck.length === 0) {
-        deckEmpty = true
-    }
-
-};
-
-// run check of game
-const isGameOn = () => {
-    if (handEmpty && comEmpty && deckEmpty) {
-        gameOn = false}
 };
 
 // render Go Fish btn -- call after checkCards()
 const canGoFish = () => {
-    
+    console.log('running canGoFish')
     // check if game is on
     if (gameOn) {
 
@@ -100,24 +80,42 @@ const canGoFish = () => {
         if (!comTurn) {
 
             // if either hand is empty, you can't ask for a card
-            if (comEmpty || handEmpty) {
-                message = `Looks like someone is out of cards. Go fish.`;
-                updateLog(message);
-                playEl.innerText = 'Go fish!';
-                playEl.style.visibility = 'visible';
+            if (comCards.length === 0 || playerCards.length === 0) {
+                
+                if(comCards.length === 0 && playerCards.length === 0) {
+                    message = `Looks like you are both out of cards. Go fish.`;
+                    updateLog(message);
+                    playEl.innerText = 'Go fish!';
+                    playEl.style.visibility = 'visible';
+                };
+                
+                if(comCards.length === 0 && !playerCards.length === 0) {
+                    message = `Looks like they are out of cards. Go fish.`;
+                    updateLog(message);
+                    playEl.innerText = 'Go fish!';
+                    playEl.style.visibility = 'visible';
+                };
 
-            // if you tried asking for a card and failed
+                if(!comCards.length === 0 && playerCards.length === 0) {
+                    message = `Looks like you are out of cards. Go fish.`;
+                    updateLog(message);
+                    playEl.innerText = 'Go fish!';
+                    playEl.style.visibility = 'visible';
+                };
+            
+            // if the player had no match
             } else if (noMatch) {
                 playEl.innerText = 'Go fish!';
                 playEl.style.visibility = 'visible';
-
-            // you can't goFish otherwise
             } else {
                 playEl.innerText = '';
                 playEl.style.visibility = 'hidden';
             };
         };
     };
+    if (!gameOn) {
+        console.log('running canGoFish point 2')
+    }
 };
 
 // check for a matching card after selecting a card, works with match var
@@ -145,6 +143,7 @@ const findMatch = (oppCards) => {
 // take the card and change the HTML elements
 const takeCard = (activePlayerCards, otherCards, activePlayerHandEl) => {
 
+    console.log(`takeCard() called`)
     // change active player array values
     activePlayerCards.push(otherCards[match]);
   
@@ -165,6 +164,7 @@ const takeCard = (activePlayerCards, otherCards, activePlayerHandEl) => {
 
 // create a function to remove pairs at any point in the game
 const removePairs = (arrayOfCards) => {
+    console.log(`removePairs() called`)
 
     for (i = 0; i < arrayOfCards.length; i++) {
         // store the value of the card that we are comparing to the rest of the deck
@@ -201,6 +201,9 @@ const removePairs = (arrayOfCards) => {
                     // cache the element before they are changed
                     let cardEl1 = document.getElementsByClassName(arrayOfCards[i])
                     let cardEl2 = document.getElementsByClassName(arrayOfCards[j])               
+
+                    console.log(cardEl1)
+                    console.log(cardEl2)
 
                     // console.log(arrayOfCards[i])
                     // console.log(arrayOfCards[j])
@@ -355,6 +358,7 @@ const goFish = (arrayOfCards) => {
 
     if (gameOn) {
 
+        console.log(`goFish() called`)
         // if computer's turn, add new card to the computer's hand
         if (comTurn) {
             console.log('com goes fish')
@@ -377,10 +381,10 @@ const goFish = (arrayOfCards) => {
         
         // if fishing during player turn
         if (!comTurn) {
-            console.log('player goes fish')
-            console.log('this is the player turn')
-            console.log('this is the deck ', deck)
             
+            // reset player variable
+            noMatch = false;
+
             // add new card to the array 
             arrayOfCards.push(deck.pop());
 
@@ -398,15 +402,15 @@ const goFish = (arrayOfCards) => {
             // remove pairs
             playerCards = removePairs(playerCards);
 
-            // check cards
+            // check sequence (game, button, over)
             checkCards();
 
             // goFish sequence (fish, pair, check) completed. End turn.
             comTurn = true;
 
-            // check game state
-            isGameOn();
+            // check game state, button, over
             canGoFish();
+            gameOver();
 
             // change turns
             test();
@@ -415,26 +419,31 @@ const goFish = (arrayOfCards) => {
 };
 
 const gameOver = () => {
-    
-    // this is always called after isGameOn()
+    console.log('running gameOver')
+    // this is always called after checkCards()
     if (!gameOn) {
+        
+        
         let highScore = Math.max.apply(Math, scores);
         playEl.innerText = 'Play again?';
         playEl.style.visibility = 'visible';
+
+        console.log(playEl.innerText)
+        console.log(playEl.style.visibility)
 
         // tie condition
         if (scores[0] === scores[1]) {
             message = `It's a tie! You both scored ${scores[0]}!`;
             updateLog();
 
-        // clear winner
-        } else {
+        } else { // clear winner
 
-        // get the index of the highest score
-        let scoreIndex = scores.indexOf(highScore);
-        let winner = names[scoreIndex];
-        message = `And the winner is... ${winner}! Want to play again?`;
-        updateLog();
+            // get the index of the highest score
+            let scoreIndex = scores.indexOf(highScore);
+            let winner = names[scoreIndex];
+
+            message = `With ${scores[0]} compared to ${scores[1]}, the winner is... ${winner}! Want to play again?`;
+            updateLog();
         };
     };
 };
@@ -448,11 +457,9 @@ const updateLog = (v) => {
 };
 
 const resetGame = () => {
-    let comTurn = false;
-    let handEmpty = false;
-    let comEmpty = false;
-    let deckEmpty = false;
-    let playerTurn = true;
+    
+    // restart game conditions
+    comTurn = false;
     scores[0] = 0;
     scores[1] = 0;
     deck = ["dA0","dQ0","dK0","dJ0","d10","d09","d08","d07","d06","d05","d04","d03","d02","hA0","hQ0","hK0","hJ0","h10","h09","h08","h07","h06","h05","h04","h03","h02","cA0","cQ0","cK0","cJ0","c10","c09","c08","c07","c06","c05","c04","c03","c02","sA0","sQ0","sK0","sJ0","s10","s09","s08","s07","s06","s05","s04","s03","s02"];
@@ -460,6 +467,7 @@ const resetGame = () => {
     forfeitEl.style.visibility = 'hidden'
 };
 
+// put away cards for reset
 const cardsAway = (arrayOfCards, arrayElement) => {
     arrayOfCards.forEach(card => {
         arrayElement.removeChild(arrayElement.lastElementChild)
@@ -467,6 +475,7 @@ const cardsAway = (arrayOfCards, arrayElement) => {
     arrayOfCards.length = 0
 }
 
+// create game environment 
 const render = () => {
     showHands();
     playerCards = removePairs(playerCards);
@@ -475,15 +484,26 @@ const render = () => {
     forfeitEl.style.visibility = 'visible';
 };
 
+// start or restart the full game
 const init = () => {
-    resetGame()
-    shuffle(deck);
-    deal();
-    gameOn = true;
+
+    // put away any old cards
+    cardsAway(comCards, comEl);
+    cardsAway(playerCards, handEl);
+
+    // reset game conditions
+    resetGame();
+
+    // run game
     render();
 };
 
-const handleTurn = (event) => {
+// player picking cards
+const handlePick = (event) => {
+
+    if (event.target.innerHTML) {
+        return
+    };
 
     // create a var to hold the card selected
     rank = event.target.classList[1][1]+event.target.classList[1][2];
@@ -526,31 +546,57 @@ const handleTurn = (event) => {
     };
 };   
 
-const test = () => {
+// computer's turn
+const takeTurn = () => {
     
     // check if gameOn
     if (gameOn) {
-
-        // player-turn variables reset
-        noMatch = false;
         
-        // check if comTurn
-        while (comTurn) {
+        // check if comTurn and if last turn loop was the last legal move
+        while (comTurn && gameOn) {
             
             // if either hand empty, goFish() sequence (fish, pair, check), turn is off
-            if (comEmpty || handEmpty) {
-                updateLog(message);
+            if (comCards.length === 0 || playerCards.length === 0) {
+                
+                // message result
+                if (comCards.length === 0 && playerCards.length === 0) {
+                    message = `Looks like you are both out of cards.`;
+                    updateLog(message);
+                };
+                
+                if (comCards.length === 0 && !playerCards.length === 0) {
+                    message = `Looks like you are out of cards.`;
+                    updateLog(message);
+                };
+                
+                if (!comCards.length === 0 && playerCards.length === 0) {
+                    message = `Looks like they are out of cards.`;
+                    updateLog(message);
+                }
+
+                // go fish sequence (fish, pair, check)
                 goFish(comCards);
 
                 comCards = removePairs(comCards);
                 checkCards();
+                canGoFish();
+                gameOver();
+
+                // close while loop
                 comTurn = false;
+                continue;
             };
 
             // if STILL comTurn, select, find, take, pair, REPEAT or select, fail, turn over
 
             // the computer selects a card
             let comCard = comCards[Math.floor(Math.random()*comCards.length)];
+            
+            // close loop if there is no card
+            if (!comCard) {
+                continue;
+            };
+
             rank = comCard[1]+comCard[2];
 
             // message the card selected
@@ -581,24 +627,13 @@ const test = () => {
 
                 // check cards and game state if last move
                 checkCards();
-                isGameOn();
                 canGoFish();
                 gameOver();
-
-                // end function if over
-                if (gameOn) break;
-
-                // if game continues, player draws if either hand empty
-                if (playerEmpty || comEmpty) {
-                    message = `Looks like one of you is out of cards. Go fish.`;
-                    updateLog(message);
-                    canGoFish();
-                };
-
-                console.log(playerCards)
-                // return to allow the player to pick another card
-                return;
-
+                
+                // reset match for next pick
+                match = null;
+                
+            // else because there is no match
             } else {
 
                 // message the result
@@ -611,26 +646,26 @@ const test = () => {
                 comCards = removePairs(comCards);
 
                 checkCards();
-
-                // before a player can start their turn
-                // check if the game is still on
-                // check if the btn element should be playable
-                // check if gameOver
-                isGameOn();
                 canGoFish();
                 gameOver();
-
-                // end turn
-                playerTurn = true; 
+                
+                // close while loop and end turn
                 comTurn = false;
             };
         }; 
 
-        // computer finish last legal move. If game on, notify player's turn.
+        // switch to player's turn
         if (gameOn) {
+
+            // notify change of turn
             message = "It's your turn now. Pick a card.";
             updateLog(message);
-        }
+
+            // check sequence (cards, button, over)
+            checkCards();
+            canGoFish();
+            gameOver();
+        };
     }; 
 };
 
@@ -638,10 +673,13 @@ const test = () => {
 
 // picking a card
 handEl.addEventListener('click', (event) => {
-
+    console.log(event.target.classList)
+    if (!event) {
+        return
+    }
     // conditions that there is no go fish button and the player
     // hasn't already failed to find a match
-    if (playEl.visibility !== 'visible' && gameLog[gameLog.length-1].includes('Go fish') === false) {
+    if (gameOn && gameLog[gameLog.length-1].includes('Go fish') === false) {
         handlePick(event)
     };
 });
@@ -681,3 +719,4 @@ forfeitEl.addEventListener('click', (event) => {
 
 // things still missing
 // scoreboard
+// animation or sufficient pause between each function to see gameplay
