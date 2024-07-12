@@ -11,7 +11,7 @@
 
 - As a player, I want to be able to start the game myself, so that needs a **Deal** button.
 - As a player, I want to select the number of players between 3-6, so that needs a selection **number of players** option above the **deal** button.
-- As a player, I want to receive the appropriate number of cards depending on the number of players (*3 player, 7 cards each; any more players, 5 cards each*), so that needs a `if`and `else` condition in the `init`. 
+- As a player, I want to receive the appropriate number of cards depending on the number of players (*3 player, 7 cards each; any more players, 5 cards each*), so that needs a `if` and `else` condition in the `init`. 
 - As a player, I want to be able to see what cards I have at any given time, so this needs to `display` the `p1` array for the player.
 - As a player, I want to be able to select the player I am asking a card for with my mouse and/or keyboard, so there should be a *hover* and *selection* effect on the other player icons.
 - As a player, I want to be able to select the card I am asking for with my mouse and/or keyboard, so there should be a *hover* and *selection* effect on the cards in the `p1` array `display`.

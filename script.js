@@ -16,15 +16,14 @@ let handEmpty = false;
 let comEmpty = false;
 let deckEmpty = false;
 let noMatch = false;
-let playerTurn = true;
 
 // cached element references
 
 let handEl = document.querySelector('.hand');
 let comEl = document.querySelector('.computer-player');
 let deckEl = document.querySelector('#deck');
-let newCardEl = document.createElement('li');
-let btnEl = document.querySelector('#btn');
+let playEl = document.querySelector('#play');
+let forfeitEl = document.querySelector('#forfeit');
 let displayEl = document.querySelector('#display');
 
 // functions 
@@ -104,18 +103,18 @@ const canGoFish = () => {
             if (comEmpty || handEmpty) {
                 message = `Looks like someone is out of cards. Go fish.`;
                 updateLog(message);
-                btnEl.innerText = 'Go fish!';
-                btnEl.style.visibility = 'visible';
+                playEl.innerText = 'Go fish!';
+                playEl.style.visibility = 'visible';
 
             // if you tried asking for a card and failed
             } else if (noMatch) {
-                btnEl.innerText = 'Go fish!';
-                btnEl.style.visibility = 'visible';
+                playEl.innerText = 'Go fish!';
+                playEl.style.visibility = 'visible';
 
             // you can't goFish otherwise
             } else {
-                btnEl.innerText = '';
-                btnEl.style.visibility = 'hidden';
+                playEl.innerText = '';
+                playEl.style.visibility = 'hidden';
             };
         };
     };
@@ -351,6 +350,7 @@ const computerTurn = () => {
     gameOver();
 };
 
+// draw a new card
 const goFish = (arrayOfCards) => {
 
     if (gameOn) {
@@ -397,41 +397,19 @@ const goFish = (arrayOfCards) => {
 
             // remove pairs
             playerCards = removePairs(playerCards);
-            console.log(playerCards)
-            
+
             // check cards
-            checkCards(playerCards);
+            checkCards();
 
-        // change turns
-        if (gameOn) {
-            playerTurn = false;
-            turns();
-        }
-    }
-    
-    // if computer's turn add new card to the computer's hand
-    if (!playerTurn) {
-        console.log('this is the computer turn')
-        console.log('this is the deck ', deck)
-        
-        let newCardEl = document.createElement('li');
-        newCardEl.classList.add("card", "back-blue", comCards[comCards.length-1]);
-        console.log(`new comCardEl, ${newCardEl}`)
-        comEl.appendChild(newCardEl);
+            // goFish sequence (fish, pair, check) completed. End turn.
+            comTurn = true;
 
-        // message the results
-        message = `The computer picked up a card.`
-        updateLog();
-
-        // check for pairs
-        comCards = removePairs(comCards);
-        console.log(comCards)
-
-        // check state of the game
-        checkCards(comCards);
+            // check game state
+            isGameOn();
+            canGoFish();
 
             // change turns
-            computerTurn();
+            test();
         };
     };
 };
@@ -446,8 +424,8 @@ const gameOver = () => {
         if (scores[0] === scores[1]) {
             message = `It's a tie! You both scored ${scores[0]}!`;
             updateLog();
-            btnEl.innerText = 'Play again?';
-            btnEl.style.visibility = 'visible';
+            playEl.innerText = 'Play again?';
+            playEl.style.visibility = 'visible';
 
         // clear winner
         } else {
@@ -457,8 +435,10 @@ const gameOver = () => {
         let winner = names[scoreIndex];
         message = `And the winner is... ${winner}! Want to play again?`;
         updateLog();
-        btnEl.innerText = 'Play again?';
-        btnEl.style.visibility = 'visible';
+
+        // option to play again
+        playEl.innerText = 'Play again?';
+        playEl.style.visibility = 'visible';
         };
     };
 };
@@ -472,21 +452,35 @@ const updateLog = (v) => {
 };
 
 const resetGame = () => {
+    let comTurn = false;
+    let handEmpty = false;
+    let comEmpty = false;
+    let deckEmpty = false;
+    let playerTurn = true;
     scores[0] = 0;
     scores[1] = 0;
     deck = ["dA0","dQ0","dK0","dJ0","d10","d09","d08","d07","d06","d05","d04","d03","d02","hA0","hQ0","hK0","hJ0","h10","h09","h08","h07","h06","h05","h04","h03","h02","cA0","cQ0","cK0","cJ0","c10","c09","c08","c07","c06","c05","c04","c03","c02","sA0","sQ0","sK0","sJ0","s10","s09","s08","s07","s06","s05","s04","s03","s02"];
+
+    forfeitEl.style.visibility = 'hidden'
 };
 
-const render = () => {
-    showHands();;
-    console.log(`removing player cards`);    
-    playerCards = removePairs(playerCards);
+const cardsAway = (arrayOfCards, arrayElement) => {
+    arrayOfCards.forEach(card => {
+        arrayElement.removeChild(arrayElement.lastElementChild)
+    })
+    arrayOfCards.length = 0
+}
 
+const render = () => {
+    showHands();
+    playerCards = removePairs(playerCards);
     comCards = removePairs(comCards);
     displayEl.style.visibility = 'visible';
+    forfeitEl.style.visibility = 'visible';
 };
 
 const init = () => {
+    resetGame()
     shuffle(deck);
     deal();
     gameOn = true;
@@ -498,20 +492,81 @@ const handleTurn = (event) => {
     // create a var to hold the card selected
     rank = event.target.classList[1][1]+event.target.classList[1][2];
 
-    // set a condition for when a card is pickable and unpickable
-    if (playerTurn && btnEl.innerText === '') {
+    // turn loop (select, match, take, pair, card check, game check)
+    
+    // match
+    match = findMatch(comCards);
 
-        // check comCards for a match
-        for (let i = 0; i <comCards.length; i++) {
-            let comCard = comCards[i];
-            let match = comCards[i][1]+comCards[i][2];
+    if (match > -1) {
 
-            // set the element in case of a match
-            comCardEl = document.getElementsByClassName(comCard);
+        // message result
+        message = `It's a match! They also had a ${rank}!`;
+        updateLog();
 
-            if (rank === match) {
-                
-                // message the results
+        // take
+        takeCard(playerCards, comCards, handEl);
+
+        // pair
+        playerCards = removePairs(playerCards);
+
+        // check
+        checkCards();
+        canGoFish();
+        isGameOn();
+        gameOver();
+
+        // reset match for next pick
+        match = undefined;
+
+    } else {
+        
+        // message result
+        message = `Oops! Looks like the computer doesn't have a match for ${rank}. Go fish.`;
+        updateLog(message);
+
+        // render go fish button
+        noMatch = true;
+        canGoFish();
+    };
+};   
+
+const test = () => {
+    
+    // check if gameOn
+    if (gameOn) {
+
+        // player-turn variables reset
+        noMatch = false;
+        
+        // check if comTurn
+        while (comTurn) {
+            
+            // if either hand empty, goFish() sequence (fish, pair, check), turn is off
+            if (comEmpty || handEmpty) {
+                updateLog(message);
+                goFish(comCards);
+
+                comCards = removePairs(comCards);
+                checkCards();
+                comTurn = false;
+            };
+
+            // if STILL comTurn, select, find, take, pair, REPEAT or select, fail, turn over
+
+            // the computer selects a card
+            let comCard = comCards[Math.floor(Math.random()*comCards.length)];
+            rank = comCard[1]+comCard[2];
+
+            // message the card selected
+            message = `The computer asks for a ${comCard}.`
+            updateLog(message);
+
+            // compare the selected card with the player's cards
+            match = findMatch(playerCards);
+
+            if (match > -1) {
+
+                // message result
                 message = `It's a match! They also had a ${rank}!`;
                 updateLog();
                 
@@ -550,38 +605,78 @@ const handleTurn = (event) => {
 
             } else {
 
-                // use a boolean to be switched on after the loop show's no match
-                noMatch = true;
+                // message the result
+                message = `You don't have a ${comCard}. The computer has to go fish.`
+                updateLog(message)
+
+                // goFish sequence (fish, pair, check)
+                goFish(comCards);
+
+                comCards = removePairs(comCards);
+
+                checkCards();
+
+                // before a player can start their turn
+                // check if the game is still on
+                // check if the btn element should be playable
+                // check if gameOver
+                isGameOn();
+                canGoFish();
+                gameOver();
+
+                // end turn
+                playerTurn = true; 
+                comTurn = false;
             };
-
-        if (noMatch) continue;
-        
-        // message result
-        message = `Oops! Looks like the computer doesn't have a match for ${rank}. Go fish.`;
-        updateLog(message)
-        canGoFish();
-        };
-    };
-};   
-
+        }; 
+        playerTurn = true;
+    }; 
+};
 
 // event listeners
 
 // picking a card
 handEl.addEventListener('click', (event) => {
-    if (btnEl.visibility !== 'visible') {
+
+    // conditions that there is no go fish button and the player
+    // hasn't already failed to find a match
+    if (playEl.visibility !== 'visible' && gameLog[gameLog.length-1].includes('Oops') === false) {
         handlePick(event)
     };
 });
 
-// clicking button
-btnEl.addEventListener('click', (event) => {
+// clicking play button
+playEl.addEventListener('click', (event) => {
     if (event.target.innerText === 'Go fish!') {
         goFish(playerCards);
-        btnEl.style.visibility = 'hidden';
-    }
+        playEl.style.visibility = 'hidden';
+    };
     if (event.target.innerText.includes('Play')) {
+        message = `New game started!`
+        updateLog(message);
         init();
-        btnEl.style.visibility = 'hidden';
-    }
-})
+        playEl.style.visibility = 'hidden';
+    };
+});
+
+// clicking forfeit
+forfeitEl.addEventListener('click', (event) => {
+    
+    // message forfeit
+    message = `You've forfeited the game. The score was ${scores[0]} for you, and ${scores[1]} for the computer.`
+    updateLog(message);
+
+    // turn off game and reset booleans
+    gameOn = false
+    resetGame();
+
+    // hide button
+    forfeitEl.style.visibility = 'hidden';
+
+    // option to play again
+    playEl.innerText = 'Play again?';
+    playEl.style.visibility = 'visible';
+});
+
+// things still missing
+// scoreboard
