@@ -419,13 +419,13 @@ const gameOver = () => {
     // this is always called after isGameOn()
     if (!gameOn) {
         let highScore = Math.max.apply(Math, scores);
+        playEl.innerText = 'Play again?';
+        playEl.style.visibility = 'visible';
 
         // tie condition
         if (scores[0] === scores[1]) {
             message = `It's a tie! You both scored ${scores[0]}!`;
             updateLog();
-            playEl.innerText = 'Play again?';
-            playEl.style.visibility = 'visible';
 
         // clear winner
         } else {
@@ -435,10 +435,6 @@ const gameOver = () => {
         let winner = names[scoreIndex];
         message = `And the winner is... ${winner}! Want to play again?`;
         updateLog();
-
-        // option to play again
-        playEl.innerText = 'Play again?';
-        playEl.style.visibility = 'visible';
         };
     };
 };
@@ -516,7 +512,7 @@ const handleTurn = (event) => {
         gameOver();
 
         // reset match for next pick
-        match = undefined;
+        match = null;
 
     } else {
         
@@ -629,7 +625,12 @@ const test = () => {
                 comTurn = false;
             };
         }; 
-        playerTurn = true;
+
+        // computer finish last legal move. If game on, notify player's turn.
+        if (gameOn) {
+            message = "It's your turn now. Pick a card.";
+            updateLog(message);
+        }
     }; 
 };
 
@@ -640,7 +641,7 @@ handEl.addEventListener('click', (event) => {
 
     // conditions that there is no go fish button and the player
     // hasn't already failed to find a match
-    if (playEl.visibility !== 'visible' && gameLog[gameLog.length-1].includes('Oops') === false) {
+    if (playEl.visibility !== 'visible' && gameLog[gameLog.length-1].includes('Go fish') === false) {
         handlePick(event)
     };
 });
