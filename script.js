@@ -72,7 +72,7 @@ const checkCards = () => {
 
 // render Go Fish btn -- call after checkCards()
 const canGoFish = () => {
-    console.log('running canGoFish')
+
     // check if game is on
     if (gameOn) {
 
@@ -113,9 +113,6 @@ const canGoFish = () => {
             };
         };
     };
-    if (!gameOn) {
-        console.log('running canGoFish point 2')
-    }
 };
 
 // check for a matching card after selecting a card, works with match var
@@ -143,7 +140,6 @@ const findMatch = (oppCards) => {
 // take the card and change the HTML elements
 const takeCard = (activePlayerCards, otherCards, activePlayerHandEl) => {
 
-    console.log(`takeCard() called`)
     // change active player array values
     activePlayerCards.push(otherCards[match]);
   
@@ -164,7 +160,6 @@ const takeCard = (activePlayerCards, otherCards, activePlayerHandEl) => {
 
 // create a function to remove pairs at any point in the game
 const removePairs = (arrayOfCards) => {
-    console.log(`removePairs() called`)
 
     for (i = 0; i < arrayOfCards.length; i++) {
         // store the value of the card that we are comparing to the rest of the deck
@@ -205,8 +200,6 @@ const removePairs = (arrayOfCards) => {
                     console.log(cardEl1)
                     console.log(cardEl2)
 
-                    // console.log(arrayOfCards[i])
-                    // console.log(arrayOfCards[j])
                     // remove html using i and j as indexes to find matching value
                     console.log(cardEl1, cardEl1[0])
                     cardEl1[0].parentNode.removeChild(cardEl1[0])
@@ -358,7 +351,6 @@ const goFish = (arrayOfCards) => {
 
     if (gameOn) {
 
-        console.log(`goFish() called`)
         // if computer's turn, add new card to the computer's hand
         if (comTurn) {
             console.log('com goes fish')
@@ -419,7 +411,7 @@ const goFish = (arrayOfCards) => {
 };
 
 const gameOver = () => {
-    console.log('running gameOver')
+
     // this is always called after checkCards()
     if (!gameOn) {
         
@@ -427,9 +419,6 @@ const gameOver = () => {
         let highScore = Math.max.apply(Math, scores);
         playEl.innerText = 'Play again?';
         playEl.style.visibility = 'visible';
-
-        console.log(playEl.innerText)
-        console.log(playEl.style.visibility)
 
         // tie condition
         if (scores[0] === scores[1]) {
@@ -673,7 +662,7 @@ const takeTurn = () => {
 
 // picking a card
 handEl.addEventListener('click', (event) => {
-    console.log(event.target.classList)
+
     if (!event) {
         return
     }
