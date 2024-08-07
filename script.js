@@ -409,6 +409,7 @@ const goFish = (arrayOfCards) => {
         };
     };
 };
+}
 
 const gameOver = () => {
 
